@@ -36,7 +36,7 @@
     }
 
     .smallInputs {
-        width: 20px;
+        width: 25px;
         border-radius: 3px;
     }
 </style>
@@ -64,19 +64,28 @@
 
         genMatrixBtn.addEventListener('click', () => {
             matrixOutput.innerHTML = '';
-            matrixOutput.innerHTML += 'Задайте матрицу ..';
+            matrixOutput.innerHTML += 'Задайте матрицу коэффициентов: ';
             width = matrixWidthInput.value - 0;
             height = matrixHeightInput.value - 0;
-            for (let i = 0; i < height; i++) {
+            for (let i = 0; i <= width; i++) {
+
+            }
+            for (let i = 0; i < height + 1; i++) {
                 const str = document.createElement('div');
                 for (let j = 0; j < width; j++) {
-                    const field = document.createElement('input');
-                    field.setAttribute('class', 'smallInputs');
-                    str.appendChild(field);
+                    if (i == 0) {
+                        let ind = j + 1;
+                        str.style.width = '25px';
+                        str.innerHTML += 'x' + ind;
+                    } else {
+                        const field = document.createElement('input');
+                        field.setAttribute('class', 'smallInputs');
+                        str.appendChild(field);
+                    }
                 }
                 matrixOutput.appendChild(str);
             }
-            matrixOutput.innerHTML += 'Задайте элемент ..';
+            matrixOutput.innerHTML += 'Задайте разрешающий элемент: ';
 
             //возможно строку со столбцом перепутала
             inputK.setAttribute('placeholder', 'столбец');
@@ -90,37 +99,25 @@
 
         });
 
-        const matrixA = [];
-
-        okBtn.addEventListener('click', () => {
-            const inputs = document.querySelectorAll('.smallInputs');
-            for (let j = 0; j < height; j++) {
-                const str = [];
-                for (let i = j * width; i < j * width + width; i++) {
-                    str.push(inputs[i].value - 0);
-                }
-                matrixA.push(str);
+        let matrixA = [];
+        let matrixB = new Array();
+        const switchElems = (matrixA, s, k) => {
+            for (let i = 0; i < matrixA.length; i++) {
+                matrixB.push(matrixA[i].slice());
             }
-            const k = inputK.value - 0;
-            const s = inputS.value - 0;
-            switchElems(matrixA, k, s);
-        });
 
-        const switchElems = (matrixA, k, s) => {
-            const matrixB = matrixA.slice(0);
+            console.log(matrixA);
             const a = matrixA[k][s];
-            console.log(matrixA)
-            console.log(matrixB)
             matrixB[k][s] = 1 / a;
-            matrixB[k].array.forEach((elem, i) => {
+            matrixB[k].forEach((elem, i) => {
                 if (i != s) {
                     matrixB[k][i] = elem / a;
                 }
-            });
+            }
+            );
             matrixB.forEach((str, i) => {
-                if (i != k) {
+                if (i != k)
                     str[s] /= -a;
-                }
             });
             for (let i = 0; i < matrixA.length; i++) {
                 if (i != k) {
@@ -131,7 +128,31 @@
                     }
                 }
             }
+            return matrixB;
         }
+
+        okBtn.addEventListener('click', () => {
+            matrixA = [];
+            matrixB = [];
+            const inputs = document.querySelectorAll('.smallInputs');
+            for (let j = 0; j < height; j++) {
+                const str = [];
+                for (let i = j * width; i < j * width + width; i++) {
+                    str.push(inputs[i].value - 0);
+                }
+                matrixA.push(str);
+            }
+            const k = inputK.value - 1;
+            const s = inputS.value - 1;
+            console.log(switchElems(matrixA, k, s));
+
+            var arr2 = matrixB.flat();
+
+
+            inputs.forEach((input, index) => {
+                input.value = arr2[index];
+            });
+        });
 
     </script>
 </body>
