@@ -58,29 +58,39 @@
         const okBtn = document.createElement('button');
         const inputK = document.createElement('input');
         const inputS = document.createElement('input');
+        const strokeDiv = document.createElement('div');
+        const columnDiv = document.createElement('div');
 
         let width;
         let height;
+        let columnArr = [];
+        let strokeArr = [];
 
         genMatrixBtn.addEventListener('click', () => {
             matrixOutput.innerHTML = '';
             matrixOutput.innerHTML += 'Задайте матрицу коэффициентов: ';
             width = matrixWidthInput.value - 0;
             height = matrixHeightInput.value - 0;
-            for (let i = 0; i <= width; i++) {
-
-            }
+            columnDiv.width = '30px';
+            matrixOutput.appendChild(strokeDiv);
+            matrixOutput.appendChild(columnDiv);
             for (let i = 0; i < height + 1; i++) {
                 const str = document.createElement('div');
-                for (let j = 0; j < width; j++) {
-                    if (i == 0) {
-                        let ind = j + 1;
-                        str.style.width = '25px';
-                        str.innerHTML += 'x' + ind;
-                    } else {
-                        const field = document.createElement('input');
-                        field.setAttribute('class', 'smallInputs');
-                        str.appendChild(field);
+                for (let j = 0; j < width + 1; j++) {
+                    const field = document.createElement('input');
+                    field.setAttribute('class', 'smallInputs');
+                    field.setAttribute('value', '0');
+                    str.appendChild(field);
+                    if (i == 0 && j != 0) {
+                        let ind = j;
+                        strokeArr.push('x' + ind);
+                        field.setAttribute('readonly', 'true');
+                        field.setAttribute('class', 'smallInputsStr');
+                        field.setAttribute('value', 'x' + ind);
+                    } else if (j == 0 && i != 0) {
+                        columnArr.push('0');
+                        field.setAttribute('readonly', 'true');
+                        field.setAttribute('class', 'smallInputsColmn');
                     }
                 }
                 matrixOutput.appendChild(str);
@@ -101,6 +111,7 @@
 
         let matrixA = [];
         let matrixB = new Array();
+
         const switchElems = (matrixA, s, k) => {
             for (let i = 0; i < matrixA.length; i++) {
                 matrixB.push(matrixA[i].slice());
@@ -134,6 +145,7 @@
         okBtn.addEventListener('click', () => {
             matrixA = [];
             matrixB = [];
+
             const inputs = document.querySelectorAll('.smallInputs');
             for (let j = 0; j < height; j++) {
                 const str = [];
@@ -142,12 +154,21 @@
                 }
                 matrixA.push(str);
             }
+
             const k = inputK.value - 1;
             const s = inputS.value - 1;
+
+            let temp = columnArr[s];
+            columnArr[s] = strokeArr[k];
+            strokeArr[k] = temp;
+
+            console.log(strokeArr);
+            strokeDiv.innerHTML = strokeArr;
+            columnDiv.innerHTML = columnArr;
+
             console.log(switchElems(matrixA, k, s));
 
             var arr2 = matrixB.flat();
-
 
             inputs.forEach((input, index) => {
                 input.value = arr2[index];
