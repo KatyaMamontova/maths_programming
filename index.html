@@ -39,6 +39,12 @@
         width: 25px;
         border-radius: 3px;
     }
+
+    .smallInputsReadOnly, .smallInputsClmn, .smallInputsStr {
+        width: 25px;
+        border-radius: 3px;
+        color: gray;
+    }
 </style>
 
 <body>
@@ -51,6 +57,7 @@
     </div>
 
     <script>
+
         const matrixOutput = document.getElementById("matrixOutput");
         const genMatrixBtn = document.getElementById("genMatrix");
         const matrixWidthInput = document.getElementById("matrixWidth");
@@ -78,19 +85,31 @@
                 const str = document.createElement('div');
                 for (let j = 0; j < width + 1; j++) {
                     const field = document.createElement('input');
-                    field.setAttribute('class', 'smallInputs');
-                    field.setAttribute('value', '0');
-                    str.appendChild(field);
+                    if (j == 0 && i == 0) {
+                        field.setAttribute('class', 'smallInputsReadOnly');
+                        field.setAttribute('value', '');
+                        str.appendChild(field);
+                    }
                     if (i == 0 && j != 0) {
                         let ind = j;
                         strokeArr.push('x' + ind);
                         field.setAttribute('readonly', 'true');
                         field.setAttribute('class', 'smallInputsStr');
-                        field.setAttribute('value', 'x' + ind);
-                    } else if (j == 0 && i != 0) {
+                        field.setAttribute('value', '-x' + ind);
+                        str.appendChild(field);
+                    }
+                    if (j == 0 && i != 0) {
                         columnArr.push('0');
                         field.setAttribute('readonly', 'true');
-                        field.setAttribute('class', 'smallInputsColmn');
+                        field.setAttribute('class', 'smallInputsClmn');
+                        field.setAttribute('placeholder', '0');
+
+                        str.appendChild(field);
+                    }
+                    if (j != 0 && i != 0) {
+                        field.setAttribute('class', 'smallInputs');
+                        field.setAttribute('value', '0');
+                        str.appendChild(field);
                     }
                 }
                 matrixOutput.appendChild(str);
@@ -147,6 +166,9 @@
             matrixB = [];
 
             const inputs = document.querySelectorAll('.smallInputs');
+            const inputsClmn = document.querySelectorAll('.smallInputsClmn');
+            const inputsStr = document.querySelectorAll('.smallInputsStr');
+
             for (let j = 0; j < height; j++) {
                 const str = [];
                 for (let i = j * width; i < j * width + width; i++) {
@@ -170,6 +192,12 @@
 
             var arr2 = matrixB.flat();
 
+            inputsStr.forEach((input, index) => {
+                input.value = strokeArr[index];
+            });
+            inputsClmn.forEach((input, index) => {
+                input.value = columnArr[index];
+            });            
             inputs.forEach((input, index) => {
                 input.value = arr2[index];
             });
