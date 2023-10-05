@@ -40,7 +40,9 @@
         border-radius: 3px;
     }
 
-    .smallInputsReadOnly, .smallInputsClmn, .smallInputsStr {
+    .smallInputsReadOnly,
+    .smallInputsClmn,
+    .smallInputsStr {
         width: 25px;
         border-radius: 3px;
         color: gray;
@@ -169,9 +171,9 @@
             const inputsClmn = document.querySelectorAll('.smallInputsClmn');
             const inputsStr = document.querySelectorAll('.smallInputsStr');
 
-            for (let j = 0; j < height; j++) {
+            for (let j = 0; j < inputsClmn.length; j++) {
                 const str = [];
-                for (let i = j * width; i < j * width + width; i++) {
+                for (let i = j * inputsStr.length; i < j * inputsStr.length + inputsStr.length; i++) {
                     str.push(inputs[i].value - 0);
                 }
                 matrixA.push(str);
@@ -192,12 +194,23 @@
 
             var arr2 = matrixB.flat();
 
+            for (let i = 0; i < matrixB.length; i++) {
+                matrixB[i][k] = 'a';
+                // matrixB[i].splice(k, 1);
+            }
+            console.log(strokeArr.length);
+
+            for (let i = k; i < arr2.length; i += strokeArr.length) {
+                inputs[i].parentElement.removeChild(inputs[i]);
+            }
+            inputsStr[k].parentElement.removeChild(inputsStr[k]);
+
             inputsStr.forEach((input, index) => {
                 input.value = strokeArr[index];
             });
             inputsClmn.forEach((input, index) => {
                 input.value = columnArr[index];
-            });            
+            });
             inputs.forEach((input, index) => {
                 input.value = arr2[index];
             });
