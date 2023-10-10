@@ -97,7 +97,8 @@
                         strokeArr.push('x' + ind);
                         field.setAttribute('readonly', 'true');
                         field.setAttribute('class', 'smallInputsStr');
-                        field.setAttribute('value', '-x' + ind);
+                        if (j == 1) field.setAttribute('value', '1'); else
+                            field.setAttribute('value', '-x' + (ind - 1));
                         str.appendChild(field);
                     }
                     if (j == 0 && i != 0) {
@@ -131,14 +132,15 @@
         });
 
         let matrixA = [];
-        let matrixB = new Array();
+        let matrixB = [];
+        let innerMatrixB = [];
 
         const switchElems = (matrixA, s, k) => {
+            matrixB = [];
             for (let i = 0; i < matrixA.length; i++) {
                 matrixB.push(matrixA[i].slice());
             }
 
-            console.log(matrixA);
             const a = matrixA[k][s];
             matrixB[k][s] = 1 / a;
             matrixB[k].forEach((elem, i) => {
@@ -163,20 +165,22 @@
             return matrixB;
         }
 
+        let flag = true;
+
         okBtn.addEventListener('click', () => {
-            matrixA = [];
-            matrixB = [];
 
             const inputs = document.querySelectorAll('.smallInputs');
             const inputsClmn = document.querySelectorAll('.smallInputsClmn');
             const inputsStr = document.querySelectorAll('.smallInputsStr');
 
-            for (let j = 0; j < inputsClmn.length; j++) {
-                const str = [];
-                for (let i = j * inputsStr.length; i < j * inputsStr.length + inputsStr.length; i++) {
-                    str.push(inputs[i].value - 0);
+            if (flag) {
+                for (let j = 0; j < inputsClmn.length; j++) {
+                    const str = [];
+                    for (let i = j * inputsStr.length; i < j * inputsStr.length + inputsStr.length; i++) {
+                        str.push(inputs[i].value - 0);
+                    }
+                    matrixA.push(str);
                 }
-                matrixA.push(str);
             }
 
             const k = inputK.value - 1;
@@ -186,24 +190,40 @@
             columnArr[s] = strokeArr[k];
             strokeArr[k] = temp;
 
-            console.log(strokeArr);
+
             strokeDiv.innerHTML = strokeArr;
             columnDiv.innerHTML = columnArr;
 
-            console.log(switchElems(matrixA, k, s));
+            matrixB = switchElems(matrixA, k, s);
 
-            var arr2 = matrixB.flat();
+            // for (let i = 0; i < matrixA.length; i++) {
+            //     innerMatrixB.push(matrixB[i].slice());
+            // }
+            console.log("matrixB ", matrixB);
+
+            matrixA = [];
+            for (let i = 0; i < matrixB.length; i++) {
+                matrixA.push(matrixB[i].slice());
+            }
+            console.log("matrixA ", matrixA);
 
             for (let i = 0; i < matrixB.length; i++) {
-                matrixB[i][k] = 'a';
-                // matrixB[i].splice(k, 1);
+                matrixB[i].splice(k, 1);
+                console.log("matrixB ", matrixB);
             }
-            console.log(strokeArr.length);
 
-            for (let i = k; i < arr2.length; i += strokeArr.length) {
+            let arr2 = matrixB.flat();
+            console.log("arr2 ", arr2);
+            // let arr2=[];
+            // for(let i = 0; i < inputs.length; i++) {
+            //     arr2.push(inputs[i].value - 0);
+            // }
+
+            for (let i = k; i < inputs.length; i += strokeArr.length) {
                 inputs[i].parentElement.removeChild(inputs[i]);
             }
             inputsStr[k].parentElement.removeChild(inputsStr[k]);
+            console.log("inputs ", inputs);
 
             inputsStr.forEach((input, index) => {
                 input.value = strokeArr[index];
@@ -211,9 +231,11 @@
             inputsClmn.forEach((input, index) => {
                 input.value = columnArr[index];
             });
-            inputs.forEach((input, index) => {
+            inputs.forEach((input, index) => {                
                 input.value = arr2[index];
             });
+            
+            flag = false;
         });
 
     </script>
