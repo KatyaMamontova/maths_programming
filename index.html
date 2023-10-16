@@ -46,16 +46,15 @@
         width: 25px;
         border-radius: 3px;
         color: gray;
+        background-color: black;
     }
 </style>
 
 <body>
-    <div id="matrixSetting">
+    <div id="matrixOutput">
         <input id="matrixWidth" placeholder="кол-во столбцов">
         <input id="matrixHeight" placeholder="кол-во строк">
         <button id="genMatrix">Создать матрицу</button>
-    </div>
-    <div id="matrixOutput">
     </div>
 
     <script>
@@ -94,11 +93,15 @@
                     }
                     if (i == 0 && j != 0) {
                         let ind = j;
-                        strokeArr.push('x' + ind);
                         field.setAttribute('readonly', 'true');
                         field.setAttribute('class', 'smallInputsStr');
-                        if (j == 1) field.setAttribute('value', '1'); else
+                        if (j == 1) {
+                            field.setAttribute('value', '1');
+                            strokeArr.push('1');
+                        } else {
                             field.setAttribute('value', '-x' + (ind - 1));
+                            strokeArr.push('-x' + (ind - 1));
+                        }
                         str.appendChild(field);
                     }
                     if (j == 0 && i != 0) {
@@ -106,12 +109,12 @@
                         field.setAttribute('readonly', 'true');
                         field.setAttribute('class', 'smallInputsClmn');
                         field.setAttribute('placeholder', '0');
-
                         str.appendChild(field);
                     }
                     if (j != 0 && i != 0) {
                         field.setAttribute('class', 'smallInputs');
-                        field.setAttribute('value', '0');
+                        field.style.backgroundColor = `rgb(${(j) * 50 + 30}, 150, 150)`;
+                        field.setAttribute('placeholder', '0');
                         str.appendChild(field);
                     }
                 }
@@ -119,7 +122,15 @@
             }
             matrixOutput.innerHTML += 'Задайте разрешающий элемент: ';
 
-            //возможно строку со столбцом перепутала
+            const inputs = document.querySelectorAll('.smallInputs');
+            inputs.forEach((input, i, inputs) => input.addEventListener('keydown', () => {
+                if (event.keyCode == '39') {
+                    if (inputs[i + 1]) inputs[i + 1].focus();
+                } else if (event.keyCode == '37') {
+                    if (inputs[i - 1]) inputs[i - 1].focus();
+                }
+            }));
+
             inputK.setAttribute('placeholder', 'столбец');
             matrixOutput.appendChild(inputK);
 
@@ -133,14 +144,11 @@
 
         let matrixA = [];
         let matrixB = [];
-        let innerMatrixB = [];
 
         const switchElems = (matrixA, s, k) => {
-            matrixB = [];
             for (let i = 0; i < matrixA.length; i++) {
                 matrixB.push(matrixA[i].slice());
             }
-
             const a = matrixA[k][s];
             matrixB[k][s] = 1 / a;
             matrixB[k].forEach((elem, i) => {
@@ -169,10 +177,11 @@
 
         okBtn.addEventListener('click', () => {
 
-            const inputs = document.querySelectorAll('.smallInputs');
+            let inputs = document.querySelectorAll('.smallInputs');
             const inputsClmn = document.querySelectorAll('.smallInputsClmn');
             const inputsStr = document.querySelectorAll('.smallInputsStr');
 
+            // записываем значения из инпутов в двумерный массив
             if (flag) {
                 for (let j = 0; j < inputsClmn.length; j++) {
                     const str = [];
@@ -183,58 +192,59 @@
                 }
             }
 
+            // индексы разрешающего элемента
             const k = inputK.value - 1;
             const s = inputS.value - 1;
 
+            // заполняем массивы для первой строки и первого столбца (нули и иксы)
             let temp = columnArr[s];
             columnArr[s] = strokeArr[k];
             strokeArr[k] = temp;
 
-
             strokeDiv.innerHTML = strokeArr;
             columnDiv.innerHTML = columnArr;
 
+            // выполняем преобразование матрицы коэффициентов
+            matrixB = [];
             matrixB = switchElems(matrixA, k, s);
 
-            // for (let i = 0; i < matrixA.length; i++) {
-            //     innerMatrixB.push(matrixB[i].slice());
-            // }
-            console.log("matrixB ", matrixB);
+            // удаляем из матрицы В столбец (каждый k-ый элемент)
+            for (let i = 0; i < matrixB.length; i++) {
+                matrixB[i].splice(k, 1);
+                console.log("matrixB ", matrixB);
+            }
 
+            // матрица А = матрица В
             matrixA = [];
             for (let i = 0; i < matrixB.length; i++) {
                 matrixA.push(matrixB[i].slice());
             }
             console.log("matrixA ", matrixA);
 
-            for (let i = 0; i < matrixB.length; i++) {
-                matrixB[i].splice(k, 1);
-                console.log("matrixB ", matrixB);
-            }
-
+            // преобразуем матрицу В в одномерный массив
             let arr2 = matrixB.flat();
-            console.log("arr2 ", arr2);
-            // let arr2=[];
-            // for(let i = 0; i < inputs.length; i++) {
-            //     arr2.push(inputs[i].value - 0);
-            // }
 
-            for (let i = k; i < inputs.length; i += strokeArr.length) {
-                inputs[i].parentElement.removeChild(inputs[i]);
+            // удаляем лишние инпуты
+            for (let i = k; i < inputs.length; i += inputsStr.length) {
+                inputs[i].remove();
             }
             inputsStr[k].parentElement.removeChild(inputsStr[k]);
-            console.log("inputs ", inputs);
 
+            // заполняем первую строку и первый столбец (нули и иксы)
             inputsStr.forEach((input, index) => {
                 input.value = strokeArr[index];
             });
             inputsClmn.forEach((input, index) => {
                 input.value = columnArr[index];
             });
-            inputs.forEach((input, index) => {                
+
+            // заполняем инпуты (матрица коэффициентов)
+            console.log("inputs ", document.querySelectorAll('.smallInputs'));
+            console.log("arr2 ", arr2);
+            document.querySelectorAll('.smallInputs').forEach((input, index) => {
                 input.value = arr2[index];
             });
-            
+
             flag = false;
         });
 
