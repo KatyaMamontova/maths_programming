@@ -46,7 +46,6 @@
         width: 25px;
         border-radius: 3px;
         color: gray;
-        background-color: black;
     }
 </style>
 
@@ -113,7 +112,6 @@
                     }
                     if (j != 0 && i != 0) {
                         field.setAttribute('class', 'smallInputs');
-                        field.style.backgroundColor = `rgb(${(j) * 50 + 30}, 150, 150)`;
                         field.setAttribute('placeholder', '0');
                         str.appendChild(field);
                     }
@@ -174,7 +172,7 @@
         }
 
         let flag = true;
-
+        let matrixForbidden = [];
         okBtn.addEventListener('click', () => {
 
             let inputs = document.querySelectorAll('.smallInputs');
@@ -195,55 +193,77 @@
             // индексы разрешающего элемента
             const k = inputK.value - 1;
             const s = inputS.value - 1;
+            console.log(s);
+            console.log(matrixForbidden);
+            console.log(matrixForbidden.indexOf(s));
+            if (matrixA[s][k] != 0 && matrixForbidden.indexOf(s) == -1) {
+                // заполняем массивы для первой строки и первого столбца (нули и иксы)
+                let temp = columnArr[s];
+                columnArr[s] = strokeArr[k];
+                strokeArr[k] = temp;
 
-            // заполняем массивы для первой строки и первого столбца (нули и иксы)
-            let temp = columnArr[s];
-            columnArr[s] = strokeArr[k];
-            strokeArr[k] = temp;
+                strokeDiv.innerHTML = strokeArr;
+                columnDiv.innerHTML = columnArr;
 
-            strokeDiv.innerHTML = strokeArr;
-            columnDiv.innerHTML = columnArr;
+                // выполняем преобразование матрицы коэффициентов
+                matrixB = [];
+                matrixB = switchElems(matrixA, k, s);
 
-            // выполняем преобразование матрицы коэффициентов
-            matrixB = [];
-            matrixB = switchElems(matrixA, k, s);
+                // удаляем из матрицы В столбец (каждый k-ый элемент)
+                for (let i = 0; i < matrixB.length; i++) {
+                    matrixB[i].splice(k, 1);
+                }
 
-            // удаляем из матрицы В столбец (каждый k-ый элемент)
-            for (let i = 0; i < matrixB.length; i++) {
-                matrixB[i].splice(k, 1);
-                console.log("matrixB ", matrixB);
+                // матрица А = матрица В
+                matrixA = [];
+                for (let i = 0; i < matrixB.length; i++) {
+                    matrixA.push(matrixB[i].slice());
+                }
+
+                // преобразуем матрицу В в одномерный массив
+                let arr2 = matrixB.flat();
+
+                // удаляем лишние инпуты
+                for (let i = k; i < inputs.length; i += inputsStr.length) {
+                    inputs[i].remove();
+                }
+                inputsStr[k].parentElement.removeChild(inputsStr[k]);
+
+                // заполняем первую строку и первый столбец (нули и иксы)
+                inputsStr.forEach((input, index) => {
+                    input.value = strokeArr[index];
+                });
+                inputsClmn.forEach((input, index) => {
+                    input.value = columnArr[index];
+                });
+
+                // заполняем инпуты (матрица коэффициентов)
+                document.querySelectorAll('.smallInputs').forEach((input, index) => {
+                    input.value = arr2[index];
+                });
+
+                //запрещаем пользователю выбирать одну строку дважды
+                matrixForbidden.push(s);
+
+                if (matrixB.length - matrixForbidden.length == 1) {
+                    let ind = columnArr.indexOf('0');
+                    if (matrixB[ind][0] == 0) {
+                        if (matrixB[ind].find(value => value != 0)) {
+                            //решения есть
+
+                        } else {
+                            okBtn.style.display = 'none';
+                            matrixOutput.innerHTML += 'Система не имеет решений';
+                        }
+                    } else if (!matrixB[ind].find(value => value != 0)) {
+                        //решений нет
+                    }
+                }
+
+            } else {
+                if (matrixA[s][k] == 0) alert("Введите ненулевой элемент")
+                else if (matrixForbidden.indexOf(s) + 1) alert("Выберите другую строку")
             }
-
-            // матрица А = матрица В
-            matrixA = [];
-            for (let i = 0; i < matrixB.length; i++) {
-                matrixA.push(matrixB[i].slice());
-            }
-            console.log("matrixA ", matrixA);
-
-            // преобразуем матрицу В в одномерный массив
-            let arr2 = matrixB.flat();
-
-            // удаляем лишние инпуты
-            for (let i = k; i < inputs.length; i += inputsStr.length) {
-                inputs[i].remove();
-            }
-            inputsStr[k].parentElement.removeChild(inputsStr[k]);
-
-            // заполняем первую строку и первый столбец (нули и иксы)
-            inputsStr.forEach((input, index) => {
-                input.value = strokeArr[index];
-            });
-            inputsClmn.forEach((input, index) => {
-                input.value = columnArr[index];
-            });
-
-            // заполняем инпуты (матрица коэффициентов)
-            console.log("inputs ", document.querySelectorAll('.smallInputs'));
-            console.log("arr2 ", arr2);
-            document.querySelectorAll('.smallInputs').forEach((input, index) => {
-                input.value = arr2[index];
-            });
 
             flag = false;
         });
